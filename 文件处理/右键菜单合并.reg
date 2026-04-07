@@ -1,0 +1,55 @@
+Windows Registry Editor Version 5.00
+
+; ============================================================
+; 1. 针对【文件夹空白处】的级联菜单
+; ============================================================
+[HKEY_CLASSES_ROOT\Directory\Background\shell\MyTools]
+"MUIVerb"="997工具"
+"SubCommands"=""
+"Icon"="shell32.dll,4"
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\MyTools\shell\01_Init]
+"MUIVerb"="1-新建审核文件夹"
+"Icon"="shell32.dll,3"
+[HKEY_CLASSES_ROOT\Directory\Background\shell\MyTools\shell\01_Init\command]
+@="wscript.exe \"E:\\VScode\\nginx\\文件处理\\02+新建审核文件夹\\init.vbs\" \"%V\""
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\MyTools\shell\02_Extract]
+"MUIVerb"="2-提取至当前目录"
+"Icon"="shell32.dll,29"
+[HKEY_CLASSES_ROOT\Directory\Background\shell\MyTools\shell\02_Extract\command]
+@="wscript.exe \"E:\\VSCode\\nginx\\文件处理\\03+提取文件至当前目录\\ExtractSubFiles.vbs\" \"background\" \"%V\""
+
+; 新增项：3-目录保留 (针对空白处)
+[HKEY_CLASSES_ROOT\Directory\Background\shell\MyTools\shell\03_KeepDir]
+"MUIVerb"="3-目录保留 (需密码)"
+"Icon"="shell32.dll,64"
+[HKEY_CLASSES_ROOT\Directory\Background\shell\MyTools\shell\03_KeepDir\command]
+@="wscript.exe \"E:\\VScode\\nginx\\文件处理\\04+目录保留\\KeepFolderOnly.vbs\" \"%V\""
+
+; ============================================================
+; 2. 针对【文件夹图标/目录树】的级联菜单
+; ============================================================
+[HKEY_CLASSES_ROOT\Directory\shell\MyTools]
+"MUIVerb"="997工具"
+"SubCommands"=""
+"Icon"="shell32.dll,4"
+
+[HKEY_CLASSES_ROOT\Directory\shell\MyTools\shell\01_Init]
+"MUIVerb"="1-新建审核文件夹"
+"Icon"="shell32.dll,3"
+[HKEY_CLASSES_ROOT\Directory\shell\MyTools\shell\01_Init\command]
+@="wscript.exe \"E:\\VScode\\nginx\\文件处理\\02+新建审核文件夹\\init.vbs\" \"%1\""
+
+[HKEY_CLASSES_ROOT\Directory\shell\MyTools\shell\02_Extract]
+"MUIVerb"="2-提取至当前目录"
+"Icon"="shell32.dll,29"
+[HKEY_CLASSES_ROOT\Directory\shell\MyTools\shell\02_Extract\command]
+@="wscript.exe \"E:\\VSCode\\nginx\\文件处理\\03+提取文件至当前目录\\ExtractSubFiles.vbs\" \"folder\" \"%1\""
+
+; 新增项：3-目录保留 (针对文件夹图标)
+[HKEY_CLASSES_ROOT\Directory\shell\MyTools\shell\03_KeepDir]
+"MUIVerb"="3-目录保留 (需密码)"
+"Icon"="shell32.dll,64"
+[HKEY_CLASSES_ROOT\Directory\shell\MyTools\shell\03_KeepDir\command]
+@="wscript.exe \"E:\\VScode\\nginx\\文件处理\\04+目录保留\\KeepFolderOnly.vbs\" \"%1\""
