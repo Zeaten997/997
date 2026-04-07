@@ -1,0 +1,23 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.zip\shell\ResultOrganizer]
+"MUIVerb"="成果文件整理"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.zip\shell\ResultOrganizer\shell\01-All]
+@="提取所有文件"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.zip\shell\ResultOrganizer\shell\01-All\command]
+@="wscript.exe \"E:\\VScode\\nginx\\文件处理\\01+成果文件整理\\ProcessZip.vbs\" \"%1\" \"1\""
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.zip\shell\ResultOrganizer\shell\02-DWG]
+@="仅提取 DWG"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.zip\shell\ResultOrganizer\shell\02-DWG\command]
+@="wscript.exe \"E:\\VScode\\nginx\\文件处理\\01+成果文件整理\\ProcessZip.vbs\" \"%1\" \"2\""
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.zip\shell\ResultOrganizer\shell\03-PDF]
+@="仅提取 PDF"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.zip\shell\ResultOrganizer\shell\03-PDF\command]
+@="wscript.exe \"E:\\VScode\\nginx\\文件处理\\01+成果文件整理\\ProcessZip.vbs\" \"%1\" \"3\""
