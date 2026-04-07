@@ -1,0 +1,17 @@
+Windows Registry Editor Version 5.00
+
+; 1. 右键点击文件夹：修复了路径引号问题
+[HKEY_CLASSES_ROOT\Directory\shell\ExtractHere]
+@="提取至当前目录"
+Icon="shell32.dll,29"
+
+[HKEY_CLASSES_ROOT\Directory\shell\ExtractHere\command]
+@="wscript.exe \"E:\\VSCode\\nginx\\文件处理\\03+提取文件至当前目录\\ExtractSubFiles.vbs\" \"folder\" \"%1\""
+
+; 2. 右键点击空白处：保持原样（因为你反馈这个已经可以了）
+[HKEY_CLASSES_ROOT\Directory\Background\shell\ExtractHere]
+@="提取至当前目录"
+Icon="shell32.dll,29"
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\ExtractHere\command]
+@="wscript.exe \"E:\\VSCode\\nginx\\文件处理\\03+提取文件至当前目录\\ExtractSubFiles.vbs\" \"background\" \"%V\""
