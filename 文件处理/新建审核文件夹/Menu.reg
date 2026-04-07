@@ -1,0 +1,17 @@
+Windows Registry Editor Version 5.00
+
+; 针对文件夹空白处
+[HKEY_CLASSES_ROOT\Directory\Background\shell\InitFolders]
+"MUIVerb"="新建审核文件夹"
+"Icon"="shell32.dll,3"
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\InitFolders\command]
+@="wscript.exe \"E:\\VScode\\nginx\\文件处理\\02+新建审核文件夹\\init.vbs\" \"%V\""
+
+; 针对左侧树形目录或文件夹图标本身（可选，建议加上更方便）
+[HKEY_CLASSES_ROOT\Directory\shell\InitFolders]
+"MUIVerb"="新建审核文件夹"
+"Icon"="shell32.dll,3"
+
+[HKEY_CLASSES_ROOT\Directory\shell\InitFolders\command]
+@="wscript.exe \"E:\\VScode\\nginx\\文件处理\\02+新建审核文件夹\\init.vbs\" \"%1\""
