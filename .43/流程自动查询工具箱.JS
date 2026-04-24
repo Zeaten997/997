@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         流程自动查询工具箱
 // @namespace    http://tampermonkey.net
-// @version      1.2
-// @description  增加时间范围选择，修复重复弹窗，并确保查询页签切换到前台
+// @version      1.3
+// @description  增加时间范围选择，修复重复弹窗，并确保查询页签切换到前台，新增自动根据结果调整分页大小功能
 // @author       YourName
 // @include      *://192.168.0.43*
 // @include      http://192.168.0.43*
@@ -63,6 +63,94 @@
     }
     return { firstDay: fmt(firstDayDate), endDay: fmt(endDate) }
   }
+
+  // ================= 新增：自动调整分页大小的核心函数 =================
+  // ================= 新增：穿透查找并自动调整分页大小的核心函数 =================
+ // ================= 修改：限定范围的穿透查找 =================
+  async function autoAdjustPageSize(type, baseWin) {
+    console.log('⏳ 开始在当前业务页面内查找数据表格并尝试自动调整分页...');
+
+    // 给后台一定的初始查询时间
+    await sleep(3500);
+
+    let targetWin = null;
+    let targetGrid = null;
+
+    // 核心穿透逻辑
+    const scanForGrid = (win) => {
+      try {
+        if (win.mini && typeof win.mini.findControls === 'function') {
+          const grids = win.mini.findControls(c => c.type === 'datagrid');
+          if (grids && grids.length > 0) {
+            return { win: win, grid: grids[0] };
+          }
+        }
+        for (let i = 0; i < win.frames.length; i++) {
+          const result = scanForGrid(win.frames[i]);
+          if (result) return result;
+        }
+      } catch (e) {}
+      return null;
+    };
+
+    // 轮询等待表格出现和加载完成 (最多等 15 秒)
+    for (let i = 0; i < 15; i++) {
+      // 【核心修复】：不再使用 window.top，而是使用当前业务专属的 baseWin
+      const found = scanForGrid(baseWin);
+
+      if (found) {
+        targetWin = found.win;
+        targetGrid = found.grid;
+
+        // 检查表格是否还在转圈加载中
+        if (typeof targetGrid.isLoading === 'function' && targetGrid.isLoading()) {
+          console.log('⏳ 表格数据加载中，继续等待...');
+          await sleep(1000);
+          continue;
+        }
+        break; // 找到了且加载完毕，跳出循环
+      }
+      await sleep(1000);
+    }
+
+    if (!targetGrid || !targetWin) {
+      console.log('⚠️ 穿透查找失败：未找到目标数据表格或加载超时，跳过分页调整');
+      return;
+    }
+
+    const total = targetGrid.getTotalCount();
+    const frameName = targetWin.name ? `[${targetWin.name}]` : '匿名Frame';
+    console.log(`📊 专属匹配成功！在 ${frameName} 找到表格 -> ID: ${targetGrid.id} | 当前总数: ${total}`);
+
+  if (total === 0) {
+  console.log('📭 查询结果为空（0条），无需调整分页');
+  return;
+}
+
+    const sizes = [10, 20, 50, 100, 200, 300, 500];
+    let targetSize = sizes.find((s) => s >= total) || 500;
+
+    const sizeCombos = targetWin.mini.findControls(
+      (c) => c.type === 'combobox' && c.name === 'pagesize'
+    );
+
+    if (sizeCombos && sizeCombos.length > 0) {
+      const sizeCombo = sizeCombos[0];
+      const currentSize = parseInt(sizeCombo.getValue(), 10);
+
+      if (currentSize !== targetSize) {
+        console.log(`🔄 发现当前页条数(${currentSize}) 不匹配总数(${total})，自动调整为 -> ${targetSize}`);
+        sizeCombo.setValue(targetSize);
+        sizeCombo.doValueChanged();
+        console.log('✅ 分页调整完成并已触发二次刷新！');
+      } else {
+        console.log(`✅ 当前分页已经是 ${currentSize}，足够显示所有 ${total} 条数据。`);
+      }
+    }
+  }
+  // =====================================================================
+  // =====================================================================
+  // =====================================================================
 
   async function startAutomation(type) {
     if (running) {
@@ -193,6 +281,7 @@
         }
       }
 
+// ...（触发查询）
       await sleep(500)
       if (typeof tw.search === 'function') {
         tw.search()
@@ -200,10 +289,16 @@
         tw.document.querySelector('.icon-search, .mini-button')?.click()
       }
       console.log('🏁 查询指令已发出')
+
+      // 【修改这里】：将找到的当前页面专属 window (tw) 传给分页调整函数
+      await autoAdjustPageSize(type, tw);
+
     } finally {
       running = false
     }
   }
+
+
 
   function findWindowByFeature(type) {
     const feature = getFeatureName(type)
