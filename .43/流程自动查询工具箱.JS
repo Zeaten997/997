@@ -58,11 +58,12 @@
       if (tw || tabBtn) {
         tabBtn?.click(); await sleep(500)
       } else {
-        const click = t => [...mainDoc.querySelectorAll('li, a, .mini-button-text')].find(e => e.innerText.trim() === t)?.click()
-        click('查询统计'); await sleep(800)
-        click('设计管理统计查询'); await sleep(500)
-        click('进度检查'); await sleep(500)
-        click(cfg.nav)
+        const clickLi = (t) =>Array.from(mainDoc.querySelectorAll('li')).find((e) => e.innerText.trim() === t)?.click()
+        const clickA = (t) =>Array.from(mainDoc.querySelectorAll('a, .mini-button-text')) .find((e) => e.innerText.trim() === t)?.click()
+        clickLi('查询统计');await sleep(800)
+        clickA('设计管理统计查询');await sleep(500)
+        clickA('进度检查');await sleep(500)
+        clickA(cfg.nav)
       }
 
       for (let i = 0; i < 15; i++) {
