@@ -9,12 +9,13 @@ Option Explicit
 Sub OnRibbonLoad(ribbon As IRibbonUI)
     Set myRibbon = ribbon
     bIsTracking = False
+    g_PageOrientation = 1
 End Sub
 
 ' Sub: GetEnabledState - 决定 Ribbon 按钮的可用性（灰色或彩色）
 ' 逻辑：开启时禁用"启动"按钮，启动停止/删除标记"按钮；反之亦然
 Sub GetEnabledState(control As IRibbonControl, ByRef returnedVal)
-    Select Case control.ID
+    Select Case control.id
         Case "BtnStart"
             returnedVal = Not bIsTracking
         Case "BtnStop", "BtnMarkDelete"
@@ -92,3 +93,42 @@ End Sub
 Public Sub HandleSheetChange(ByVal Sh As Object, ByVal Target As Range)
     ProcessSheetChange Sh, Target
 End Sub
+
+
+' ==========================================
+' WORD导出
+' ==========================================
+Sub GetPressed(control As IRibbonControl, ByRef returnedVal)
+    If control.id = "chkPortrait" Then returnedVal = (g_PageOrientation = 0)
+    If control.id = "chkLandscape" Then returnedVal = (g_PageOrientation = 1)
+End Sub
+
+Sub OnAction_CheckBox(control As IRibbonControl, pressed As Boolean)
+    If Not pressed Then
+        If Not myRibbon Is Nothing Then
+            myRibbon.InvalidateControl "chkPortrait"
+            myRibbon.InvalidateControl "chkLandscape"
+        End If
+        Exit Sub
+    End If
+    
+    If control.id = "chkPortrait" Then g_PageOrientation = 0
+    If control.id = "chkLandscape" Then g_PageOrientation = 1
+    
+    If Not myRibbon Is Nothing Then
+        myRibbon.InvalidateControl "chkPortrait"
+        myRibbon.InvalidateControl "chkLandscape"
+    End If
+End Sub
+
+Sub OnBtnSingle(control As IRibbonControl)
+    Call StartExportProcess(False) ' 调用主模块的导出单页方法
+End Sub
+
+Sub OnBtnAll(control As IRibbonControl)
+    Call StartExportProcess(True)  ' 调用主模块的导出所有方法
+End Sub
+' ==========================================
+' WORD导出
+' ==========================================
+
