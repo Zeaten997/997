@@ -30,13 +30,23 @@
           </box>
         </group>
 
-        <!-- 新增分组三：Word 导出 -->
+        <!-- 分组三：Word 导出 -->
         <group id="grpExport" label="Word 导出">
           <checkBox id="chkLandscape" label="横向" getPressed="GetPressed" onAction="OnAction_CheckBox" />
           <checkBox id="chkPortrait" label="纵向" getPressed="GetPressed" onAction="OnAction_CheckBox" />
           <button id="btnSingle" label="单专业" size="large" onAction="OnBtnSingle" imageMso="ExportWord" />
           <button id="btnAll" label="全部转换" size="large" onAction="OnBtnAll" imageMso="MultiplePages" />
         </group>
+        
+        <!-- 分组四：仪表设备汇总 -->
+        <group id="GroupSummary" label="仪表设备汇总">
+          <box id="boxSummaryVerticalLayout" boxStyle="vertical">
+            <checkBox id="chkCodex" label="Codex" getPressed="GetPressed_Summary" onAction="OnAction_CheckBox_Summary" />
+            <checkBox id="chkGemini" label="Gemini" getPressed="GetPressed_Summary" onAction="OnAction_CheckBox_Summary" />
+            <button id="BtnExecuteSummary" label="汇    总" onAction="OnBtnExecuteSummary" imageMso="DataFormExcel" />
+          </box>
+        </group>
+
 
       </tab>
     </tabs>
