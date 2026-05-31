@@ -1,0 +1,63 @@
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="OnRibbonLoad">
+  <ribbon startFromScratch="false">
+    <tabs>
+      
+      <!-- 统一使用一个选项卡：997工具箱 -->
+      <tab id="TabDataAudit" label="997工具箱">
+        
+        <!-- 分组一：排版辅助 -->
+        <group id="GroupBorder" label="排版辅助">
+          <button id="BtnBorder" label="外边框加粗" size="large" imageMso="BorderThickOutside" onAction="BtnBorder_Click" />
+        </group>
+            
+        <!-- 分组二：修改追踪 -->
+        <group id="GroupTracker" label="修改追踪">
+          <!-- 第一列：启动与停止（保持大图标） -->
+          <button id="BtnStart" label="启动标记" size="large" imageMso="InkingStart" onAction="StartTracker_Click" getEnabled="GetEnabledState"/>
+          <button id="BtnStop" label="停止标记" size="large" imageMso="InkDeleteAllInk" onAction="StopTracker_Click" getEnabled="GetEnabledState"/>
+          
+          <!-- 第二列：手动标记与标记删除（垂直排列） -->
+          <box id="boxColumn1" boxStyle="vertical">
+            <button id="BtnManualMark" label="手动标记" onAction="ManualMark_Click" imageMso="TextHighlightColorPicker" />
+            <button id="BtnMarkDelete" label="标记删除" onAction="MarkDelete_Click" imageMso="Strikethrough" />
+          </box>
+
+          <!-- 第三列：三种清除功能（垂直排列） -->
+          <box id="boxColumn2" boxStyle="vertical">
+            <button id="BtnClearFormatsOnly" label="清除标记格式" onAction="ClearFormatsOnly_Click" imageMso="ClearFormats" />
+            <button id="BtnClearMarksAndDates" label="清除格式及日期" onAction="ClearMarksAndDates_Click" imageMso="DeleteRows" />
+            <button id="BtnClearManualSelection" label="手动清除" onAction="ClearManualSelection_Click" imageMso="Clear" />
+          </box>
+        </group>
+
+        <!-- 分组三：Word 导出 -->
+        <group id="grpExport" label="Word 导出">
+        <!-- 第一列 (横向、纵向、手动) -->
+           <box id="boxExport1" boxStyle="vertical">
+            <checkBox id="chkLandscape" label="横向" getPressed="GetPressed" onAction="OnAction_CheckBox" />
+            <checkBox id="chkPortrait" label="纵向" getPressed="GetPressed" onAction="OnAction_CheckBox" />
+            <button id="btnManual" label="手动" onAction="OnBtnManual" imageMso="ExportWord" />
+          </box>
+  
+        <!-- 第二列 (全部、自动化、电信) -->
+          <box id="boxExport2" boxStyle="vertical">
+            <button id="btnAll" label="全部" onAction="OnBtnAll" imageMso="MultiplePages" />
+            <button id="btnAuto" label="自动化" onAction="OnBtnAuto" imageMso="TableInsert" />
+            <button id="btnTelecom" label="电信" onAction="OnBtnTelecom" imageMso="TableInsert" />
+          </box>
+        </group>
+                
+        <!-- 分组四：仪表设备汇总 -->
+        <group id="GroupSummary" label="仪表设备汇总">
+          <box id="boxSummaryVerticalLayout" boxStyle="vertical">
+            <checkBox id="chkCodex" label="Codex" getPressed="GetPressed_Summary" onAction="OnAction_CheckBox_Summary" />
+            <checkBox id="chkGemini" label="Gemini" getPressed="GetPressed_Summary" onAction="OnAction_CheckBox_Summary" />
+            <button id="BtnExecuteSummary" label="汇    总" onAction="OnBtnExecuteSummary" imageMso="DataFormExcel" />
+          </box>
+        </group>
+
+
+      </tab>
+    </tabs>
+  </ribbon>
+</customUI>
