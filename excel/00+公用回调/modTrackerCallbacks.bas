@@ -67,9 +67,13 @@ Sub ManualMark_Click(control As IRibbonControl)
     ApplyManualMark sel
 End Sub
 
-' Sub: RefreshRibbon - 强制刷新 Ribbon 按钮状态，使其重新调用 GetEnabledState
+' Sub: RefreshRibbon - 强制刷新 Ribbon 全局状态
 Sub RefreshRibbon()
-    RefreshRibbon
+    If Not myRibbon Is Nothing Then
+        myRibbon.Invalidate ' 刷新整个 Ribbon
+    Else
+        MsgBox "Ribbon 连接已丢失，请重新打开工作簿恢复功能。", vbExclamation, "状态提醒"
+    End If
 End Sub
 
 ' 回调 1：清除所有格式
@@ -105,29 +109,39 @@ Sub GetPressed(control As IRibbonControl, ByRef returnedVal)
 End Sub
 
 Sub OnAction_CheckBox(control As IRibbonControl, pressed As Boolean)
+    ' 【新增拦截】如果 Ribbon 对象丢失，拦截点击并提示，防止出现双选假象
+    If myRibbon Is Nothing Then
+        MsgBox "后台 Ribbon 状态已重置。" & vbCrLf & "请保存并重新打开工作簿。", vbCritical, "无法执行"
+        Exit Sub
+    End If
+
     If Not pressed Then
-        If Not myRibbon Is Nothing Then
-            myRibbon.InvalidateControl "chkPortrait"
-            myRibbon.InvalidateControl "chkLandscape"
-        End If
+        myRibbon.InvalidateControl "chkPortrait"
+        myRibbon.InvalidateControl "chkLandscape"
         Exit Sub
     End If
     
     If control.id = "chkPortrait" Then g_PageOrientation = 0
     If control.id = "chkLandscape" Then g_PageOrientation = 1
     
-    If Not myRibbon Is Nothing Then
-        myRibbon.InvalidateControl "chkPortrait"
-        myRibbon.InvalidateControl "chkLandscape"
-    End If
+    myRibbon.InvalidateControl "chkPortrait"
+    myRibbon.InvalidateControl "chkLandscape"
 End Sub
 
-Sub OnBtnSingle(control As IRibbonControl)
-    Call StartExportProcess(False) ' 调用主模块的导出单页方法
+Sub OnBtnManual(control As IRibbonControl)
+    Call StartExportProcess(EXPORT_MODE_MANUAL)
+End Sub
+
+Sub OnBtnAuto(control As IRibbonControl)
+    Call StartExportProcess(EXPORT_MODE_AUTO)
+End Sub
+
+Sub OnBtnTelecom(control As IRibbonControl)
+    Call StartExportProcess(EXPORT_MODE_TELECOM)
 End Sub
 
 Sub OnBtnAll(control As IRibbonControl)
-    Call StartExportProcess(True)  ' 调用主模块的导出所有方法
+    Call StartExportProcess(EXPORT_MODE_ALL)
 End Sub
 ' ==========================================
 ' 仪表设备汇总
@@ -138,21 +152,22 @@ Sub GetPressed_Summary(control As IRibbonControl, ByRef returnedVal)
 End Sub
 
 Sub OnAction_CheckBox_Summary(control As IRibbonControl, pressed As Boolean)
+       If myRibbon Is Nothing Then
+        MsgBox "后台 Ribbon 状态已重置。" & vbCrLf & "请保存并重新打开工作簿。", vbCritical, "无法执行"
+        Exit Sub
+    End If
+
     If Not pressed Then
-        If Not myRibbon Is Nothing Then
-            myRibbon.InvalidateControl "chkCodex"
-            myRibbon.InvalidateControl "chkGemini"
-        End If
+        myRibbon.InvalidateControl "chkCodex"
+        myRibbon.InvalidateControl "chkGemini"
         Exit Sub
     End If
     
     If control.id = "chkCodex" Then g_SummaryMode = 0
     If control.id = "chkGemini" Then g_SummaryMode = 1
     
-    If Not myRibbon Is Nothing Then
-        myRibbon.InvalidateControl "chkCodex"
-        myRibbon.InvalidateControl "chkGemini"
-    End If
+    myRibbon.InvalidateControl "chkCodex"
+    myRibbon.InvalidateControl "chkGemini"
 End Sub
 
 Sub OnBtnExecuteSummary(control As IRibbonControl)
