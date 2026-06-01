@@ -7,6 +7,8 @@
 // @include      *://192.168.0.43*
 // @grant        GM_registerMenuCommand
 // @run-at       document-start
+// @updateURL    https://raw.githubusercontent.com/Zeaten997/997/refs/heads/main/.43/%E6%B5%81%E7%A8%8B%E8%87%AA%E5%8A%A8%E6%9F%A5%E8%AF%A2%E5%B7%A5%E5%85%B7%E7%AE%B1.JS
+// @downloadURL  https://raw.githubusercontent.com/Zeaten997/997/refs/heads/main/.43/%E6%B5%81%E7%A8%8B%E8%87%AA%E5%8A%A8%E6%9F%A5%E8%AF%A2%E5%B7%A5%E5%85%B7%E7%AE%B1.JS
 // ==/UserScript==
 
 ;(function () {
