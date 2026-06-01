@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         流程自动查询工具箱
 // @namespace    http://tampermonkey.net
-// @version      2.0
-// @description  重构
-// @author       Adaptive Collaborator
+// @version      2.1
+// @description  增加上个月查询功能
+// @author       Adaptive Collaborator & Gemini
 // @include      *://192.168.0.43*
 // @grant        GM_registerMenuCommand
 // @run-at       document-start
@@ -43,7 +43,8 @@
 
   async function startAutomation(type) {
     if (running) return
-    const input = prompt('范围：1=本周，2=本月', '1')
+    // 修改点 1：更新提示语
+    const input = prompt('范围：1=本周，2=本月，3=上月', '1')
     if (!input) return
     running = true
 
@@ -74,12 +75,23 @@
 
       if (!tw?.mini) return alert(`❌ 无法定位页面: ${cfg.title}`)
 
-      // 2. 填值
-      const mini = tw.mini, now = new Date(), first = fmt(new Date(now.getFullYear(), now.getMonth(), 1)), end = new Date(now)
-      input === '2' ? end.setMonth(now.getMonth() + 1, 0) : end.setDate(now.getDate() + (now.getDay() === 0 ? 0 : 7 - now.getDay()))
+      // 2. 填值 (修改点 2：增加上月时间计算逻辑)
+      const mini = tw.mini, now = new Date();
+      let firstDate, endDate;
 
-      mini.getbyName(cfg.dateFields[0])?.setValue(first)
-      mini.getbyName(cfg.dateFields[1])?.setValue(fmt(end))
+      if (input === '3') {
+        // 上个月：起始日为上个月1号，结束日为本月第0天（即上个月最后一天）
+        firstDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        endDate = new Date(now.getFullYear(), now.getMonth(), 0);
+      } else {
+        // 原有逻辑：本周或本月
+        firstDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now);
+        input === '2' ? endDate.setMonth(now.getMonth() + 1, 0) : endDate.setDate(now.getDate() + (now.getDay() === 0 ? 0 : 7 - now.getDay()));
+      }
+
+      mini.getbyName(cfg.dateFields[0])?.setValue(fmt(firstDate))
+      mini.getbyName(cfg.dateFields[1])?.setValue(fmt(endDate))
 
       const major = mini.getbyName(cfg.majorName) || (cfg.fallbackMajor ? mini.findControls(c => c.type === 'buttonedit')[0] : null)
       if (major) {
