@@ -36,6 +36,7 @@ Private Const CFG_WIDTH_LANDSCAPE_B As String = "1.2, 5.0,11.1, 1.2, 1.2, 0.0, 1
 Private Const CFG_WIDTH_LANDSCAPE_C As String = "1.2, 5.0,12.3, 1.2, 1.2, 1.2, 0.0, 0.0, 3.8" ' 横向C：无重量，有总计
 Private Const CFG_WIDTH_LANDSCAPE_D As String = "1.2, 5.0,12.3, 1.2, 1.2, 0.0, 0.0, 0.0, 5.0" ' 横向D：无重量，无总计
 
+
 ' 5. 全局状态变量
 Public g_RibbonUI As IRibbonUI
 Public g_PageOrientation As Long ' 0=纵向, 1=横向
@@ -50,11 +51,23 @@ Private Const CFG_BLOCK_SKIP_END As String = "计算机控制系统应用软件"
 Private Const CFG_EXCLUDE_NAMES As String = "设备及安装,材料及安装" ' 需要过滤不输出的项目名称关键字 (多个词用英文逗号隔开)
 
 
+' 在这里填写你允许保留的规格关键词（支持英文、数字、汉字及特殊符号）
+Private Property Get specKeywords() As Variant
+    specKeywords = Array("防爆", "成套")
+End Property
+
+
+
+
 ' 7. 获取需要过滤的尺寸正则规则 (由于VBA不支持数组常量，用函数返回)
 Private Function GetSizePatterns() As Variant
-    GetSizePatterns = Array("DN\d+[，。、；：,.;:]?", "D\d+[Xx×]\d+[，。、；：,.;:]?", _
-                            "φ\d+[Xx×]\d+[，。、；：,.;:]?", "Φ\d+[Xx×]\d+[，。、；：,.;:]?", "统计IO用")
+    GetSizePatterns = Array("DN\d+(?:\.\d+)?[，。、；：,.;:]?", _
+                            "D\d+(?:\.\d+)?[Xx×]\d+(?:\.\d+)?[，。、；：,.;:]?", _
+                            "φ\d+(?:\.\d+)?[Xx×]\d+(?:\.\d+)?[，。、；：,.;:]?", _
+                            "Φ\d+(?:\.\d+)?[Xx×]\d+(?:\.\d+)?[，。、；：,.;:]?", _
+                            "统计IO用")
 End Function
+
 
 
 ' ==========================================================
@@ -380,7 +393,7 @@ Function ProcessSingleTable(ByVal selRange As Range, ByVal wdApp As Object, ByVa
         Next c
     Next r
     
-    ' 4. 识别数值列与合并同类项
+     ' 4. 识别数值列与合并同类项
     For c = 1 To srcCols
         If Not selRange.Columns(c).Hidden Then
             Dim headVal As String: headVal = selRange.Cells(1, c).mergeArea.Cells(1, 1).Value
@@ -389,26 +402,57 @@ Function ProcessSingleTable(ByVal selRange As Range, ByVal wdApp As Object, ByVa
     Next c
     
     If colIdxName > 0 And colIdxSpec > 0 Then
+        ' 前置处理：符合成套条件的强制修改规格
         For r = (excelHeaderRowsCount + 1) To srcRows
             If Left(dataArr(r, colIdxName), 1) = "*" Or InStr(dataArr(r, colIdxName), "成套") > 0 Then
                 dataArr(r, colIdxSpec) = "设备成套提供"
             End If
         Next r
+        
+' 自下而上合并相邻行
         For r = srcRows To (excelHeaderRowsCount + 2) Step -1
+            ' 【条件一】相邻的两行都必须是显示状态
             If Not (selRange.rows(r).Hidden Or selRange.rows(r - 1).Hidden) Then
-                If CleanString(dataArr(r, colIdxName)) = CleanString(dataArr(r - 1, colIdxName)) And _
-                   CleanString(dataArr(r, colIdxSpec)) = CleanString(dataArr(r - 1, colIdxSpec)) And _
-                   CleanString(dataArr(r, colIdxName)) <> "" Then
+                
+                Dim nameCurr As String: nameCurr = CleanString(dataArr(r, colIdxName))
+                Dim namePrev As String: namePrev = CleanString(dataArr(r - 1, colIdxName))
+                
+                ' 使用新规则清洗规格：只保留白名单内的关键词
+                Dim specCurr As String: specCurr = CleanSpecWithKeywords(dataArr(r, colIdxSpec), specKeywords)
+                Dim specPrev As String: specPrev = CleanSpecWithKeywords(dataArr(r - 1, colIdxSpec), specKeywords)
+                
+                ' 【条件二】清洗后的“名称”必须完全相同
+                ' 【条件三·新】基于关键词清洗后的“规格”必须完全相同
+                ' 【条件四】名称不能为空
+                If nameCurr = namePrev And specCurr = specPrev And nameCurr <> "" Then
+                    
+                    ' 1. 数量累加
                     Dim subCol As Long
                     For subCol = 1 To srcCols
                         If isQtyCol(subCol) Then dataArr(r - 1, subCol) = Val(dataArr(r, subCol)) + Val(dataArr(r - 1, subCol))
                     Next subCol
+                    
+                    ' ==========================================================
+                    ' 2. 【新增修复】处理合并后的原始规格显示
+                    ' 如果两行的原始规格字符串不完全一样，说明是不同细分规格被合并了。
+                    ' 为了避免保留单一规格造成误导，将其清空（或者你可以改为 "-"）
+                    If dataArr(r, colIdxSpec) <> dataArr(r - 1, colIdxSpec) Then
+                        dataArr(r - 1, colIdxSpec) = ""
+                        ' 如果你想把它变成拼接形式，可以把上面那句换成：
+                        ' dataArr(r - 1, colIdxSpec) = dataArr(r - 1, colIdxSpec) & " / " & dataArr(r, colIdxSpec)
+                    End If
+                    ' ==========================================================
+                    
+                    ' 3. 打上合并标记并清空备注
                     dataArr(r, colIdxName) = "[MERGED_ROW]"
                     If colIdxMemo > 0 Then dataArr(r, colIdxMemo) = "": dataArr(r - 1, colIdxMemo) = ""
+                    
                 End If
-            End If
-        Next r
-    End If
+                
+            End If ' <--- 就是这里！补上【条件一】的 End If
+            
+            Next r
+        End If
     
     ' 5. 输出数据到 Word 表格
     Dim excelToWordRow() As Long: ReDim excelToWordRow(1 To srcRows)
@@ -864,6 +908,32 @@ Function CleanString(ByVal inputStr As String) As String
     End If
     CleanString = regEx.Replace(inputStr, "")
 End Function
+
+'规格专用清洗函数
+Private Function CleanSpecWithKeywords(ByVal inputStr As String, ByVal keywords As Variant) As String
+    Dim kw As Variant
+    Dim cleanRes As String: cleanRes = ""
+    
+    ' 如果输入为空，直接返回
+    If Trim(inputStr) = "" Then
+        CleanSpecWithKeywords = ""
+        Exit Function
+    End If
+    
+    ' 遍历关键词白名单
+    For Each kw In keywords
+        If Trim(kw) <> "" Then
+            ' 不区分大小写比对：如果规格中包含该关键词
+            If InStr(1, inputStr, kw, vbTextCompare) > 0 Then
+                cleanRes = kw
+                Exit For ' 匹配到第一个关键词后立即退出，防止冲突
+            End If
+        End If
+    Next kw
+    
+    CleanSpecWithKeywords = cleanRes
+End Function
+
 '过滤关键字行
 Private Function IsExcludedName(ByVal cellText As String) As Boolean
     Dim excludeArr() As String
