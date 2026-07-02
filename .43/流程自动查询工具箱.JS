@@ -77,30 +77,43 @@
 
       if (!tw?.mini) return alert(`❌ 无法定位页面: ${cfg.title}`)
 
-      // 2. 填值 (修改点 2：增加上月时间计算逻辑)
-      const mini = tw.mini, now = new Date();
-      let firstDate, endDate;
+    // 2. 填值 (修改点 2：增加上月时间计算逻辑)
+const mini = tw.mini, now = new Date();
+let firstDate, endDate;
 
-      if (input === '3') {
-        // 上个月：起始日为上个月1号，结束日为本月第0天（即上个月最后一天）
-        firstDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        endDate = new Date(now.getFullYear(), now.getMonth(), 0);
-      } else {
-        // 原有逻辑：本周或本月
-        firstDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        endDate = new Date(now);
-        input === '2' ? endDate.setMonth(now.getMonth() + 1, 0) : endDate.setDate(now.getDate() + (now.getDay() === 0 ? 0 : 7 - now.getDay()));
-      }
+if (input === '3') {
+    // 上个月：起始日为上个月1号，结束日为本月第0天（即上个月最后一天）
+    firstDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    endDate = new Date(now.getFullYear(), now.getMonth(), 0);
+} else if (input === '1') {
+    // 本周逻辑修复：基于当前日期计算周一和周日
+    const currentDay = now.getDay();
+    // JS中周日为0，转换为周一为1，周日为7的计算权重
+    const dayOffset = currentDay === 0 ? 6 : currentDay - 1; 
+    
+    // 计算本周一
+    firstDate = new Date(now);
+    firstDate.setDate(now.getDate() - dayOffset);
+    
+    // 计算本周日
+    endDate = new Date(firstDate);
+    endDate.setDate(firstDate.getDate() + 6);
+} else {
+    // 本月：本月1号 到 本月最后一天
+    firstDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+}
 
-      mini.getbyName(cfg.dateFields[0])?.setValue(fmt(firstDate))
-      mini.getbyName(cfg.dateFields[1])?.setValue(fmt(endDate))
+mini.getbyName(cfg.dateFields[0])?.setValue(fmt(firstDate))
+mini.getbyName(cfg.dateFields[1])?.setValue(fmt(endDate))
+const major = mini.getbyName(cfg.majorName) || (cfg.fallbackMajor ? mini.findControls(c => c.type === 'buttonedit')[0] : null)
+if (major) {
+    major.setValue(cfg.majorVal);
+    major.setText(cfg.majorText);
+    major.doValueChanged?.()
+}
+await sleep(300)
 
-      const major = mini.getbyName(cfg.majorName) || (cfg.fallbackMajor ? mini.findControls(c => c.type === 'buttonedit')[0] : null)
-      if (major) {
-        major.setValue(cfg.majorVal); major.setText(cfg.majorText); major.doValueChanged?.()
-      }
-
-      await sleep(300)
 
       // 3. 监控加载并自动分页
       const grid = mini.findControls(c => c.type === 'datagrid')[0]
