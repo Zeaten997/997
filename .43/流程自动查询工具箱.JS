@@ -77,7 +77,7 @@
 
       if (!tw?.mini) return alert(`❌ 无法定位页面: ${cfg.title}`)
 
-    // 2. 填值 (修改点 2：增加上月时间计算逻辑)
+// 2. 填值 (修改点 2：增加上月时间计算逻辑)
 const mini = tw.mini, now = new Date();
 let firstDate, endDate;
 
@@ -86,24 +86,25 @@ if (input === '3') {
     firstDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     endDate = new Date(now.getFullYear(), now.getMonth(), 0);
 } else if (input === '1') {
-    // 本周逻辑修复：基于当前日期计算周一和周日
+    // 本周逻辑修改：开始时间为本周一所在月的1号，结束时间为本周日
     const currentDay = now.getDay();
-    // JS中周日为0，转换为周一为1，周日为7的计算权重
-    const dayOffset = currentDay === 0 ? 6 : currentDay - 1; 
-    
-    // 计算本周一
-    firstDate = new Date(now);
-    firstDate.setDate(now.getDate() - dayOffset);
-    
-    // 计算本周日
-    endDate = new Date(firstDate);
-    endDate.setDate(firstDate.getDate() + 6);
+    const dayOffset = currentDay === 0 ? 6 : currentDay - 1;
+
+    // 1. 先计算出本周一的临时日期
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - dayOffset);
+
+    // 2. 开始时间：设置为本周一所在月份的 1 号
+    firstDate = new Date(monday.getFullYear(), monday.getMonth(), 1);
+
+    // 3. 结束时间：仍为本周日
+    endDate = new Date(monday);
+    endDate.setDate(monday.getDate() + 6);
 } else {
     // 本月：本月1号 到 本月最后一天
     firstDate = new Date(now.getFullYear(), now.getMonth(), 1);
     endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 }
-
 mini.getbyName(cfg.dateFields[0])?.setValue(fmt(firstDate))
 mini.getbyName(cfg.dateFields[1])?.setValue(fmt(endDate))
 const major = mini.getbyName(cfg.majorName) || (cfg.fallbackMajor ? mini.findControls(c => c.type === 'buttonedit')[0] : null)
