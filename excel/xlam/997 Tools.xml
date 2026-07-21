@@ -20,6 +20,7 @@
           <box id="boxColumn1" boxStyle="vertical">
             <button id="BtnManualMark" label="手动标记" onAction="ManualMark_Click" imageMso="TextHighlightColorPicker" />
             <button id="BtnMarkDelete" label="标记删除" onAction="MarkDelete_Click" imageMso="Strikethrough" />
+            <button id="BtnAutoCleanDeleted" label="清理已删除" onAction="AutoCleanDeleted_Click" imageMso="DeleteRows" />
           </box>
 
           <!-- 第三列：三种清除功能（垂直排列） -->
@@ -32,12 +33,21 @@
 
         <!-- 分组三：Word 导出 -->
         <group id="grpExport" label="Word 导出">
-          <checkBox id="chkLandscape" label="横向" getPressed="GetPressed" onAction="OnAction_CheckBox" />
-          <checkBox id="chkPortrait" label="纵向" getPressed="GetPressed" onAction="OnAction_CheckBox" />
-          <button id="btnSingle" label="单专业" size="large" onAction="OnBtnSingle" imageMso="ExportWord" />
-          <button id="btnAll" label="全部转换" size="large" onAction="OnBtnAll" imageMso="MultiplePages" />
+        <!-- 第一列 (横向、纵向、手动) -->
+           <box id="boxExport1" boxStyle="vertical">
+            <checkBox id="chkLandscape" label="横向" getPressed="GetPressed" onAction="OnAction_CheckBox" />
+            <checkBox id="chkPortrait" label="纵向" getPressed="GetPressed" onAction="OnAction_CheckBox" />
+            <button id="btnManual" label="手动" onAction="OnBtnManual" imageMso="ExportWord" />
+          </box>
+  
+        <!-- 第二列 (全部、自动化、电信) -->
+          <box id="boxExport2" boxStyle="vertical">
+            <button id="btnAll" label="全部" onAction="OnBtnAll" imageMso="MultiplePages" />
+            <button id="btnAuto" label="自动化" onAction="OnBtnAuto" imageMso="TableInsert" />
+            <button id="btnTelecom" label="电信" onAction="OnBtnTelecom" imageMso="TableInsert" />
+          </box>
         </group>
-        
+                
         <!-- 分组四：仪表设备汇总 -->
         <group id="GroupSummary" label="仪表设备汇总">
           <box id="boxSummaryVerticalLayout" boxStyle="vertical">
